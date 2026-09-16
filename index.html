@@ -1,17 +1,19 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <meta
     name="description"
-    content="Free online image compressor and converter. Convert JPG, PNG and WebP images directly in your browser."
+    content="Free online image compressor and converter. Convert JPG, PNG and WebP images and reduce image size to your desired KB."
   >
 
   <meta
     name="keywords"
-    content="image compressor, image converter, JPG to WebP, PNG to WebP, WebP converter"
+    content="image compressor, image converter, JPG to WebP, PNG to WebP, WebP to JPG, image resize, compress image to 100kb"
   >
 
   <title>Image Compressor & Converter</title>
@@ -22,32 +24,48 @@
 <body>
 
   <header class="header">
+
     <div class="container">
 
       <h1>Image Compressor & Converter</h1>
 
       <p>
-        Compress and convert JPG, PNG and WebP images directly in your browser.
+        Compress and convert JPG, PNG and WebP images online.
       </p>
 
     </div>
+
   </header>
+
 
   <main class="container">
 
     <section class="tool-card">
 
-      <div class="upload-area" id="dropArea">
 
-        <div class="upload-icon">📷</div>
+      <!-- Upload Area -->
 
-        <h2>Upload Your Images</h2>
+      <div
+        class="upload-area"
+        id="dropArea"
+      >
+
+        <div class="upload-icon">
+          📷
+        </div>
+
+        <h2>
+          Upload Your Images
+        </h2>
 
         <p>
-          Drag & drop images here or choose files from your device.
+          Drag & drop your images here or choose files from your device.
         </p>
 
-        <label class="upload-btn" for="fileInput">
+        <label
+          class="upload-btn"
+          for="fileInput"
+        >
           Choose Images
         </label>
 
@@ -60,12 +78,48 @@
         >
 
         <small>
-          Supported: JPG, JPEG, PNG, WebP
+          JPG, JPEG, PNG and WebP supported
         </small>
 
       </div>
 
+
+      <!-- Image Preview -->
+
+      <div
+        id="previewSection"
+        class="preview-section hidden"
+      >
+
+        <div class="preview-header">
+
+          <h2>
+            Selected Images
+          </h2>
+
+          <button
+            id="removeAllBtn"
+            class="remove-all-btn"
+          >
+            Remove All
+          </button>
+
+        </div>
+
+        <div
+          id="previewGrid"
+          class="preview-grid"
+        ></div>
+
+      </div>
+
+
+      <!-- Settings -->
+
       <div class="settings">
+
+
+        <!-- Format -->
 
         <div class="setting-group">
 
@@ -91,11 +145,18 @@
 
         </div>
 
+
+        <!-- Quality -->
+
         <div class="setting-group">
 
           <label for="quality">
+
             Quality:
-            <span id="qualityValue">80</span>%
+            <span id="qualityValue">
+              80
+            </span>%
+
           </label>
 
           <input
@@ -108,6 +169,9 @@
 
         </div>
 
+
+        <!-- Maximum Width -->
+
         <div class="setting-group">
 
           <label for="maxWidth">
@@ -117,13 +181,34 @@
           <input
             type="number"
             id="maxWidth"
-            placeholder="Original size"
             min="100"
+            placeholder="Original size"
+          >
+
+        </div>
+
+
+        <!-- Target Size -->
+
+        <div class="setting-group">
+
+          <label for="targetSize">
+            Target Size (KB)
+          </label>
+
+          <input
+            type="number"
+            id="targetSize"
+            min="1"
+            placeholder="Example: 100"
           >
 
         </div>
 
       </div>
+
+
+      <!-- Buttons -->
 
       <div class="action-buttons">
 
@@ -145,6 +230,9 @@
       </div>
 
     </section>
+
+
+    <!-- Results -->
 
     <section
       id="resultsSection"
@@ -172,6 +260,7 @@
 
   </main>
 
+
   <footer>
 
     <p>
@@ -181,7 +270,10 @@
 
   </footer>
 
+
   <script src="script.js"></script>
 
 </body>
+
 </html>
+```
