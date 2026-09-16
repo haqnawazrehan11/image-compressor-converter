@@ -1,423 +1,583 @@
-const fileInput = document.getElementById("fileInput");
-const dropArea = document.getElementById("dropArea");
-const convertBtn = document.getElementById("convertBtn");
-const clearBtn = document.getElementById("clearBtn");
-const formatSelect = document.getElementById("format");
-const qualitySlider = document.getElementById("quality");
-const qualityValue = document.getElementById("qualityValue");
-const maxWidthInput = document.getElementById("maxWidth");
-const resultsSection = document.getElementById("resultsSection");
-const resultsContainer = document.getElementById("results");
-const downloadAllBtn = document.getElementById("downloadAllBtn");
+```css
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-let selectedFiles = [];
-let convertedFiles = [];
 
-qualitySlider.addEventListener("input", () => {
-  qualityValue.textContent = qualitySlider.value;
-});
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f5f7fb;
+  color: #1f2937;
+  line-height: 1.6;
+}
 
-fileInput.addEventListener("change", (event) => {
-  addFiles(event.target.files);
-});
 
-["dragenter", "dragover"].forEach((eventName) => {
-  dropArea.addEventListener(eventName, (e) => {
-    e.preventDefault();
-    dropArea.classList.add("dragover");
-  });
-});
+.container {
+  width: min(1100px, 92%);
+  margin: auto;
+}
 
-["dragleave", "drop"].forEach((eventName) => {
-  dropArea.addEventListener(eventName, (e) => {
-    e.preventDefault();
-    dropArea.classList.remove("dragover");
-  });
-});
 
-dropArea.addEventListener("drop", (e) => {
-  addFiles(e.dataTransfer.files);
-});
+/* Header */
 
-function addFiles(files) {
-
-  const imageFiles = Array.from(files).filter((file) =>
-    [
-      "image/jpeg",
-      "image/png",
-      "image/webp"
-    ].includes(file.type)
+.header {
+  background: linear-gradient(
+    135deg,
+    #2563eb,
+    #7c3aed
   );
 
-  selectedFiles = [
-    ...selectedFiles,
-    ...imageFiles
-  ];
+  color: white;
 
-  convertBtn.disabled = selectedFiles.length === 0;
+  text-align: center;
 
-  if (selectedFiles.length > 0) {
-
-    dropArea.querySelector("h2").textContent =
-      `${selectedFiles.length} image(s) selected`;
-
-  }
+  padding: 55px 20px;
 }
 
-convertBtn.addEventListener("click", async () => {
 
-  if (!selectedFiles.length) return;
-
-  convertBtn.disabled = true;
-  convertBtn.textContent = "Processing...";
-
-  resultsContainer.innerHTML = "";
-  convertedFiles = [];
-
-  resultsSection.classList.remove("hidden");
-
-  for (const file of selectedFiles) {
-
-    try {
-
-      const converted = await processImage(file);
-
-      convertedFiles.push(converted);
-
-      displayResult(converted);
-
-    } catch (error) {
-
-      console.error(error);
-
-      const errorElement = document.createElement("div");
-
-      errorElement.className = "result-card";
-
-      errorElement.innerHTML = `
-        <div class="error">
-          Could not process ${escapeHTML(file.name)}
-        </div>
-      `;
-
-      resultsContainer.appendChild(errorElement);
-    }
-  }
-
-  convertBtn.disabled = false;
-  convertBtn.textContent = "Convert & Compress";
-});
-
-function processImage(file) {
-
-  return new Promise((resolve, reject) => {
-
-    const reader = new FileReader();
-
-    reader.onload = (event) => {
-
-      const img = new Image();
-
-      img.onload = () => {
-
-        let width = img.naturalWidth;
-        let height = img.naturalHeight;
-
-        const maxWidth =
-          parseInt(maxWidthInput.value);
-
-        if (maxWidth && width > maxWidth) {
-
-          height =
-            Math.round(
-              height * (maxWidth / width)
-            );
-
-          width = maxWidth;
-        }
-
-        const canvas =
-          document.createElement("canvas");
-
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx =
-          canvas.getContext("2d");
-
-        const format =
-          formatSelect.value;
-
-        if (format === "image/jpeg") {
-
-          ctx.fillStyle = "#ffffff";
-
-          ctx.fillRect(
-            0,
-            0,
-            width,
-            height
-          );
-        }
-
-        ctx.drawImage(
-          img,
-          0,
-          0,
-          width,
-          height
-        );
-
-        const quality =
-          Number(qualitySlider.value) / 100;
-
-        canvas.toBlob(
-          (blob) => {
-
-            if (!blob) {
-
-              reject(
-                new Error("Conversion failed")
-              );
-
-              return;
-            }
-
-            const extension =
-              getExtension(format);
-
-            const originalName =
-              file.name.replace(
-                /\.[^/.]+$/,
-                ""
-              );
-
-            const newName =
-              `${originalName}-converted.${extension}`;
-
-            resolve({
-
-              originalFile: file,
-
-              blob: blob,
-
-              url: URL.createObjectURL(blob),
-
-              name: newName,
-
-              originalSize: file.size,
-
-              newSize: blob.size
-
-            });
-
-          },
-          format,
-          quality
-        );
-      };
-
-      img.onerror = () => {
-        reject(new Error("Invalid image"));
-      };
-
-      img.src = event.target.result;
-    };
-
-    reader.onerror = () => {
-      reject(new Error("File reading failed"));
-    };
-
-    reader.readAsDataURL(file);
-  });
-}
-
-function getExtension(format) {
-
-  if (format === "image/webp") {
-    return "webp";
-  }
-
-  if (format === "image/png") {
-    return "png";
-  }
-
-  return "jpg";
-}
-
-function displayResult(file) {
-
-  const savedPercent =
-    file.originalSize > 0
-      ? Math.round(
-          (
-            (file.originalSize - file.newSize) /
-            file.originalSize
-          ) * 100
-        )
-      : 0;
-
-  const card =
-    document.createElement("div");
-
-  card.className = "result-card";
-
-  card.innerHTML = `
-
-    <img
-      src="${file.url}"
-      alt="Converted image"
-    >
-
-    <div class="file-info">
-
-      <h3>
-        ${escapeHTML(file.name)}
-      </h3>
-
-      <p>
-        Original:
-        ${formatBytes(file.originalSize)}
-        →
-        New:
-        ${formatBytes(file.newSize)}
-      </p>
-
-      <p class="${savedPercent > 0 ? "success" : ""}">
-
-        ${
-          savedPercent > 0
-            ? `${savedPercent}% smaller`
-            : "Converted successfully"
-        }
-
-      </p>
-
-    </div>
-
-    <button class="download-btn">
-      Download
-    </button>
-  `;
-
-  const downloadButton =
-    card.querySelector(".download-btn");
-
-  downloadButton.addEventListener(
-    "click",
-    () => {
-      downloadFile(
-        file.url,
-        file.name
-      );
-    }
+.header h1 {
+  font-size: clamp(
+    30px,
+    5vw,
+    48px
   );
 
-  resultsContainer.appendChild(card);
+  margin-bottom: 10px;
 }
 
-downloadAllBtn.addEventListener(
-  "click",
-  () => {
 
-    if (!convertedFiles.length) return;
+.header p {
+  font-size: 17px;
 
-    convertedFiles.forEach(
-      (file, index) => {
-
-        setTimeout(() => {
-
-          downloadFile(
-            file.url,
-            file.name
-          );
-
-        }, index * 300);
-
-      }
-    );
-  }
-);
-
-function downloadFile(url, filename) {
-
-  const link =
-    document.createElement("a");
-
-  link.href = url;
-  link.download = filename;
-
-  document.body.appendChild(link);
-
-  link.click();
-
-  link.remove();
+  opacity: 0.95;
 }
 
-function formatBytes(bytes) {
 
-  if (bytes === 0) {
-    return "0 Bytes";
-  }
+/* Main Tool */
 
-  const units = [
-    "Bytes",
-    "KB",
-    "MB",
-    "GB"
-  ];
+.tool-card {
+  background: white;
 
-  const i =
-    Math.floor(
-      Math.log(bytes) /
-      Math.log(1024)
+  margin: 35px auto;
+
+  padding: 30px;
+
+  border-radius: 18px;
+
+  box-shadow:
+    0 10px 35px
+    rgba(0, 0, 0, 0.07);
+}
+
+
+/* Upload */
+
+.upload-area {
+  border: 2px dashed #cbd5e1;
+
+  border-radius: 15px;
+
+  padding: 50px 20px;
+
+  text-align: center;
+
+  transition: 0.25s;
+}
+
+
+.upload-area.dragover {
+  border-color: #2563eb;
+
+  background: #eff6ff;
+}
+
+
+.upload-icon {
+  font-size: 48px;
+
+  margin-bottom: 10px;
+}
+
+
+.upload-area h2 {
+  margin-bottom: 8px;
+}
+
+
+.upload-area p {
+  color: #64748b;
+
+  margin-bottom: 20px;
+}
+
+
+.upload-area small {
+  display: block;
+
+  margin-top: 15px;
+
+  color: #94a3b8;
+}
+
+
+.upload-btn {
+  display: inline-block;
+
+  background: #2563eb;
+
+  color: white;
+
+  padding: 12px 24px;
+
+  border-radius: 9px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+
+.upload-btn:hover {
+  background: #1d4ed8;
+}
+
+
+/* Preview */
+
+.preview-section {
+  margin-top: 30px;
+}
+
+
+.preview-section.hidden {
+  display: none;
+}
+
+
+.preview-header {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 15px;
+}
+
+
+.remove-all-btn {
+  background: #fee2e2;
+
+  color: #dc2626;
+
+  border: 0;
+
+  padding: 9px 14px;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  font-weight: 600;
+}
+
+
+.preview-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(140px, 1fr)
     );
 
-  return (
-    parseFloat(
-      (
-        bytes /
-        Math.pow(1024, i)
-      ).toFixed(2)
-    ) +
-    " " +
-    units[i]
+  gap: 15px;
+}
+
+
+.preview-item {
+  position: relative;
+
+  background: #f8fafc;
+
+  border: 1px solid #e2e8f0;
+
+  border-radius: 12px;
+
+  padding: 8px;
+
+  overflow: hidden;
+}
+
+
+.preview-item img {
+  width: 100%;
+
+  height: 120px;
+
+  object-fit: cover;
+
+  border-radius: 8px;
+
+  display: block;
+}
+
+
+.preview-name {
+  font-size: 12px;
+
+  margin-top: 7px;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+
+.remove-image {
+  position: absolute;
+
+  top: 13px;
+
+  right: 13px;
+
+  width: 28px;
+
+  height: 28px;
+
+  border: 0;
+
+  border-radius: 50%;
+
+  background: rgba(
+    220,
+    38,
+    38,
+    0.9
   );
+
+  color: white;
+
+  cursor: pointer;
+
+  font-weight: bold;
 }
 
-function escapeHTML(text) {
 
-  const div =
-    document.createElement("div");
+/* Settings */
 
-  div.textContent = text;
+.settings {
+  display: grid;
 
-  return div.innerHTML;
+  grid-template-columns:
+    repeat(4, 1fr);
+
+  gap: 20px;
+
+  margin-top: 30px;
 }
 
-clearBtn.addEventListener(
-  "click",
-  () => {
 
-    selectedFiles = [];
+.setting-group {
+  display: flex;
 
-    convertedFiles.forEach(
-      (file) => {
-        URL.revokeObjectURL(file.url);
-      }
-    );
+  flex-direction: column;
 
-    convertedFiles = [];
+  gap: 8px;
+}
 
-    resultsContainer.innerHTML = "";
 
-    resultsSection.classList.add("hidden");
+.setting-group label {
+  font-weight: 600;
+}
 
-    fileInput.value = "";
 
-    convertBtn.disabled = true;
+select,
+input[type="number"] {
+  width: 100%;
 
-    dropArea.querySelector("h2").textContent =
-      "Upload Your Images";
+  padding: 12px;
+
+  border: 1px solid #cbd5e1;
+
+  border-radius: 8px;
+
+  background: white;
+
+  font-size: 15px;
+}
+
+
+input[type="range"] {
+  width: 100%;
+
+  accent-color: #2563eb;
+
+  margin-top: 8px;
+}
+
+
+/* Buttons */
+
+.action-buttons {
+  display: flex;
+
+  gap: 12px;
+
+  margin-top: 30px;
+}
+
+
+.primary-btn,
+.secondary-btn,
+.download-all-btn {
+  padding: 13px 22px;
+
+  border: 0;
+
+  border-radius: 9px;
+
+  cursor: pointer;
+
+  font-weight: 600;
+}
+
+
+.primary-btn {
+  background: #2563eb;
+
+  color: white;
+}
+
+
+.primary-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+
+.primary-btn:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+
+
+.secondary-btn {
+  background: #e2e8f0;
+
+  color: #334155;
+}
+
+
+.secondary-btn:hover {
+  background: #cbd5e1;
+}
+
+
+/* Results */
+
+.results-section {
+  margin-bottom: 50px;
+}
+
+
+.results-section.hidden {
+  display: none;
+}
+
+
+.results-header {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 20px;
+}
+
+
+.download-all-btn {
+  background: #16a34a;
+
+  color: white;
+}
+
+
+.download-all-btn:hover {
+  background: #15803d;
+}
+
+
+.result-card {
+  background: white;
+
+  border-radius: 14px;
+
+  padding: 18px;
+
+  margin-bottom: 15px;
+
+  display: grid;
+
+  grid-template-columns:
+    90px 1fr auto;
+
+  align-items: center;
+
+  gap: 18px;
+
+  box-shadow:
+    0 5px 20px
+    rgba(0, 0, 0, 0.05);
+}
+
+
+.result-card img {
+  width: 90px;
+
+  height: 70px;
+
+  object-fit: cover;
+
+  border-radius: 8px;
+
+  background: #f1f5f9;
+}
+
+
+.file-info h3 {
+  font-size: 16px;
+
+  margin-bottom: 5px;
+
+  word-break: break-word;
+}
+
+
+.file-info p {
+  font-size: 14px;
+
+  color: #64748b;
+}
+
+
+.download-btn {
+  background: #2563eb;
+
+  color: white;
+
+  padding: 10px 16px;
+
+  border: 0;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  font-weight: 600;
+}
+
+
+.download-btn:hover {
+  background: #1d4ed8;
+}
+
+
+.success {
+  color: #16a34a !important;
+}
+
+
+.error {
+  color: #dc2626;
+}
+
+
+/* Footer */
+
+footer {
+  text-align: center;
+
+  padding: 30px 15px;
+
+  color: #64748b;
+
+  font-size: 14px;
+}
+
+
+/* Mobile */
+
+@media (max-width: 900px) {
+
+  .settings {
+    grid-template-columns:
+      repeat(2, 1fr);
   }
-);
+
+}
+
+
+@media (max-width: 600px) {
+
+  .settings {
+    grid-template-columns: 1fr;
+  }
+
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+
+  .action-buttons button {
+    width: 100%;
+  }
+
+
+  .results-header {
+    flex-direction: column;
+
+    align-items: stretch;
+
+    gap: 15px;
+  }
+
+
+  .result-card {
+    grid-template-columns:
+      70px 1fr;
+  }
+
+
+  .result-card img {
+    width: 70px;
+
+    height: 60px;
+  }
+
+
+  .download-btn {
+    grid-column: 1 / -1;
+
+    width: 100%;
+  }
+
+
+  .tool-card {
+    padding: 20px;
+  }
+
+
+  .preview-grid {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+}
+```
