@@ -1,583 +1,1205 @@
-```css
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+```javascript
+const fileInput =
+  document.getElementById("fileInput");
 
+const dropArea =
+  document.getElementById("dropArea");
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-  background: #f5f7fb;
-  color: #1f2937;
-  line-height: 1.6;
-}
+const convertBtn =
+  document.getElementById("convertBtn");
 
+const clearBtn =
+  document.getElementById("clearBtn");
 
-.container {
-  width: min(1100px, 92%);
-  margin: auto;
-}
+const removeAllBtn =
+  document.getElementById("removeAllBtn");
 
+const formatSelect =
+  document.getElementById("format");
 
-/* Header */
+const qualitySlider =
+  document.getElementById("quality");
 
-.header {
-  background: linear-gradient(
-    135deg,
-    #2563eb,
-    #7c3aed
-  );
+const qualityValue =
+  document.getElementById("qualityValue");
 
-  color: white;
+const maxWidthInput =
+  document.getElementById("maxWidth");
 
-  text-align: center;
+const targetSizeInput =
+  document.getElementById("targetSize");
 
-  padding: 55px 20px;
-}
+const previewSection =
+  document.getElementById("previewSection");
 
+const previewGrid =
+  document.getElementById("previewGrid");
 
-.header h1 {
-  font-size: clamp(
-    30px,
-    5vw,
-    48px
-  );
+const resultsSection =
+  document.getElementById("resultsSection");
 
-  margin-bottom: 10px;
-}
+const resultsContainer =
+  document.getElementById("results");
 
+const downloadAllBtn =
+  document.getElementById("downloadAllBtn");
 
-.header p {
-  font-size: 17px;
 
-  opacity: 0.95;
-}
+let selectedFiles = [];
 
+let convertedFiles = [];
 
-/* Main Tool */
 
-.tool-card {
-  background: white;
+/* Quality Slider */
 
-  margin: 35px auto;
+qualitySlider.addEventListener(
+  "input",
+  () => {
 
-  padding: 30px;
+    qualityValue.textContent =
+      qualitySlider.value;
 
-  border-radius: 18px;
+  }
+);
 
-  box-shadow:
-    0 10px 35px
-    rgba(0, 0, 0, 0.07);
-}
 
+/* File Selection */
 
-/* Upload */
+fileInput.addEventListener(
+  "change",
+  (event) => {
 
-.upload-area {
-  border: 2px dashed #cbd5e1;
-
-  border-radius: 15px;
-
-  padding: 50px 20px;
-
-  text-align: center;
-
-  transition: 0.25s;
-}
-
-
-.upload-area.dragover {
-  border-color: #2563eb;
-
-  background: #eff6ff;
-}
-
-
-.upload-icon {
-  font-size: 48px;
-
-  margin-bottom: 10px;
-}
-
-
-.upload-area h2 {
-  margin-bottom: 8px;
-}
-
-
-.upload-area p {
-  color: #64748b;
-
-  margin-bottom: 20px;
-}
-
-
-.upload-area small {
-  display: block;
-
-  margin-top: 15px;
-
-  color: #94a3b8;
-}
-
-
-.upload-btn {
-  display: inline-block;
-
-  background: #2563eb;
-
-  color: white;
-
-  padding: 12px 24px;
-
-  border-radius: 9px;
-
-  font-weight: 600;
-
-  cursor: pointer;
-}
-
-
-.upload-btn:hover {
-  background: #1d4ed8;
-}
-
-
-/* Preview */
-
-.preview-section {
-  margin-top: 30px;
-}
-
-
-.preview-section.hidden {
-  display: none;
-}
-
-
-.preview-header {
-  display: flex;
-
-  justify-content: space-between;
-
-  align-items: center;
-
-  margin-bottom: 15px;
-}
-
-
-.remove-all-btn {
-  background: #fee2e2;
-
-  color: #dc2626;
-
-  border: 0;
-
-  padding: 9px 14px;
-
-  border-radius: 8px;
-
-  cursor: pointer;
-
-  font-weight: 600;
-}
-
-
-.preview-grid {
-  display: grid;
-
-  grid-template-columns:
-    repeat(
-      auto-fill,
-      minmax(140px, 1fr)
+    addFiles(
+      event.target.files
     );
 
-  gap: 15px;
+  }
+);
+
+
+/* Drag & Drop */
+
+[
+  "dragenter",
+  "dragover"
+].forEach(
+  (eventName) => {
+
+    dropArea.addEventListener(
+      eventName,
+      (event) => {
+
+        event.preventDefault();
+
+        dropArea.classList.add(
+          "dragover"
+        );
+
+      }
+    );
+
+  }
+);
+
+
+[
+  "dragleave",
+  "drop"
+].forEach(
+  (eventName) => {
+
+    dropArea.addEventListener(
+      eventName,
+      (event) => {
+
+        event.preventDefault();
+
+        dropArea.classList.remove(
+          "dragover"
+        );
+
+      }
+    );
+
+  }
+);
+
+
+dropArea.addEventListener(
+  "drop",
+  (event) => {
+
+    addFiles(
+      event.dataTransfer.files
+    );
+
+  }
+);
+
+
+/* Add Images */
+
+function addFiles(files) {
+
+  const imageFiles =
+    Array.from(files).filter(
+      (file) => {
+
+        return [
+          "image/jpeg",
+          "image/png",
+          "image/webp"
+        ].includes(
+          file.type
+        );
+
+      }
+    );
+
+
+  selectedFiles = [
+    ...selectedFiles,
+    ...imageFiles
+  ];
+
+
+  renderPreviews();
+
+
+  convertBtn.disabled =
+    selectedFiles.length === 0;
+
 }
 
 
-.preview-item {
-  position: relative;
+/* Image Previews */
 
-  background: #f8fafc;
+function renderPreviews() {
 
-  border: 1px solid #e2e8f0;
-
-  border-radius: 12px;
-
-  padding: 8px;
-
-  overflow: hidden;
-}
+  previewGrid.innerHTML = "";
 
 
-.preview-item img {
-  width: 100%;
+  if (!selectedFiles.length) {
 
-  height: 120px;
+    previewSection.classList.add(
+      "hidden"
+    );
 
-  object-fit: cover;
+    return;
 
-  border-radius: 8px;
-
-  display: block;
-}
+  }
 
 
-.preview-name {
-  font-size: 12px;
-
-  margin-top: 7px;
-
-  white-space: nowrap;
-
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-}
-
-
-.remove-image {
-  position: absolute;
-
-  top: 13px;
-
-  right: 13px;
-
-  width: 28px;
-
-  height: 28px;
-
-  border: 0;
-
-  border-radius: 50%;
-
-  background: rgba(
-    220,
-    38,
-    38,
-    0.9
+  previewSection.classList.remove(
+    "hidden"
   );
 
-  color: white;
 
-  cursor: pointer;
+  selectedFiles.forEach(
+    (file, index) => {
 
-  font-weight: bold;
+      const item =
+        document.createElement(
+          "div"
+        );
+
+
+      item.className =
+        "preview-item";
+
+
+      const imageURL =
+        URL.createObjectURL(
+          file
+        );
+
+
+      item.innerHTML = `
+
+        <img
+          src="${imageURL}"
+          alt="${escapeHTML(file.name)}"
+        >
+
+        <div class="preview-name">
+          ${escapeHTML(file.name)}
+        </div>
+
+        <button
+          class="remove-image"
+          title="Remove image"
+        >
+          ×
+        </button>
+
+      `;
+
+
+      item
+        .querySelector(
+          ".remove-image"
+        )
+        .addEventListener(
+          "click",
+          () => {
+
+            URL.revokeObjectURL(
+              imageURL
+            );
+
+
+            selectedFiles.splice(
+              index,
+              1
+            );
+
+
+            renderPreviews();
+
+
+            convertBtn.disabled =
+              selectedFiles.length === 0;
+
+          }
+        );
+
+
+      previewGrid.appendChild(
+        item
+      );
+
+    }
+  );
+
 }
 
 
-/* Settings */
+/* Remove All */
 
-.settings {
-  display: grid;
+removeAllBtn.addEventListener(
+  "click",
+  () => {
 
-  grid-template-columns:
-    repeat(4, 1fr);
+    selectedFiles = [];
 
-  gap: 20px;
+    fileInput.value = "";
 
-  margin-top: 30px;
+    renderPreviews();
+
+    convertBtn.disabled = true;
+
+  }
+);
+
+
+/* Convert */
+
+convertBtn.addEventListener(
+  "click",
+  async () => {
+
+    if (!selectedFiles.length) {
+      return;
+    }
+
+
+    convertBtn.disabled = true;
+
+    convertBtn.textContent =
+      "Processing...";
+
+
+    resultsContainer.innerHTML =
+      "";
+
+
+    convertedFiles = [];
+
+
+    resultsSection.classList.remove(
+      "hidden"
+    );
+
+
+    for (
+      const file of selectedFiles
+    ) {
+
+      try {
+
+        const converted =
+          await processImage(file);
+
+
+        convertedFiles.push(
+          converted
+        );
+
+
+        displayResult(
+          converted
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          error
+        );
+
+
+        showError(
+          file.name
+        );
+
+      }
+
+    }
+
+
+    convertBtn.disabled = false;
+
+    convertBtn.textContent =
+      "Convert & Compress";
+
+  }
+);
+
+
+/* Process Image */
+
+function processImage(file) {
+
+  return new Promise(
+    (resolve, reject) => {
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        (event) => {
+
+          const img =
+            new Image();
+
+
+          img.onload =
+            async () => {
+
+              let width =
+                img.naturalWidth;
+
+
+              let height =
+                img.naturalHeight;
+
+
+              const maxWidth =
+                parseInt(
+                  maxWidthInput.value
+                );
+
+
+              /*
+                Resize image if
+                Maximum Width is set.
+              */
+
+              if (
+                maxWidth &&
+                width > maxWidth
+              ) {
+
+                height =
+                  Math.round(
+                    height *
+                    (
+                      maxWidth /
+                      width
+                    )
+                  );
+
+
+                width =
+                  maxWidth;
+
+              }
+
+
+              const canvas =
+                document.createElement(
+                  "canvas"
+                );
+
+
+              canvas.width =
+                width;
+
+
+              canvas.height =
+                height;
+
+
+              const ctx =
+                canvas.getContext(
+                  "2d"
+                );
+
+
+              const format =
+                formatSelect.value;
+
+
+              /*
+                JPG does not support
+                transparent backgrounds.
+              */
+
+              if (
+                format ===
+                "image/jpeg"
+              ) {
+
+                ctx.fillStyle =
+                  "#ffffff";
+
+
+                ctx.fillRect(
+                  0,
+                  0,
+                  width,
+                  height
+                );
+
+              }
+
+
+              ctx.drawImage(
+                img,
+                0,
+                0,
+                width,
+                height
+              );
+
+
+              /*
+                Target KB
+              */
+
+              const targetKB =
+                parseFloat(
+                  targetSizeInput.value
+                );
+
+
+              /*
+                If Target Size is empty,
+                use normal quality.
+              */
+
+              if (!targetKB) {
+
+                const quality =
+                  Number(
+                    qualitySlider.value
+                  ) / 100;
+
+
+                const blob =
+                  await canvasToBlob(
+                    canvas,
+                    format,
+                    quality
+                  );
+
+
+                finishConversion(
+                  file,
+                  blob,
+                  format,
+                  resolve,
+                  reject
+                );
+
+
+                return;
+
+              }
+
+
+              /*
+                Target bytes.
+              */
+
+              const targetBytes =
+                targetKB * 1024;
+
+
+              /*
+                Find best quality
+                using binary search.
+              */
+
+              let low =
+                0.05;
+
+
+              let high =
+                1;
+
+
+              let bestBlob =
+                null;
+
+
+              for (
+                let i = 0;
+                i < 12;
+                i++
+              ) {
+
+                const quality =
+                  (
+                    low +
+                    high
+                  ) / 2;
+
+
+                const blob =
+                  await canvasToBlob(
+                    canvas,
+                    format,
+                    quality
+                  );
+
+
+                if (
+                  blob.size >
+                  targetBytes
+                ) {
+
+                  high =
+                    quality;
+
+                } else {
+
+                  bestBlob =
+                    blob;
+
+                  low =
+                    quality;
+
+                }
+
+              }
+
+
+              /*
+                If target is very small
+                and quality alone cannot
+                reach it, reduce dimensions.
+              */
+
+              if (
+                !bestBlob ||
+                bestBlob.size >
+                targetBytes
+              ) {
+
+                let currentWidth =
+                  width;
+
+
+                let currentHeight =
+                  height;
+
+
+                for (
+                  let i = 0;
+                  i < 12;
+                  i++
+                ) {
+
+                  currentWidth =
+                    Math.round(
+                      currentWidth *
+                      0.9
+                    );
+
+
+                  currentHeight =
+                    Math.round(
+                      currentHeight *
+                      0.9
+                    );
+
+
+                  canvas.width =
+                    currentWidth;
+
+
+                  canvas.height =
+                    currentHeight;
+
+
+                  const newCtx =
+                    canvas.getContext(
+                      "2d"
+                    );
+
+
+                  if (
+                    format ===
+                    "image/jpeg"
+                  ) {
+
+                    newCtx.fillStyle =
+                      "#ffffff";
+
+
+                    newCtx.fillRect(
+                      0,
+                      0,
+                      currentWidth,
+                      currentHeight
+                    );
+
+                  }
+
+
+                  newCtx.drawImage(
+                    img,
+                    0,
+                    0,
+                    currentWidth,
+                    currentHeight
+                  );
+
+
+                  const smallerBlob =
+                    await canvasToBlob(
+                      canvas,
+                      format,
+                      0.5
+                    );
+
+
+                  bestBlob =
+                    smallerBlob;
+
+
+                  if (
+                    smallerBlob.size <=
+                    targetBytes
+                  ) {
+
+                    break;
+
+                  }
+
+                }
+
+              }
+
+
+              /*
+                Final conversion.
+              */
+
+              finishConversion(
+                file,
+                bestBlob,
+                format,
+                resolve,
+                reject
+              );
+
+            };
+
+
+          img.onerror =
+            () => {
+
+              reject(
+                new Error(
+                  "Invalid image"
+                )
+              );
+
+            };
+
+
+          img.src =
+            event.target.result;
+
+        };
+
+
+      reader.onerror =
+        () => {
+
+          reject(
+            new Error(
+              "File reading failed"
+            )
+          );
+
+        };
+
+
+      reader.readAsDataURL(
+        file
+      );
+
+    }
+  );
+
 }
 
 
-.setting-group {
-  display: flex;
+/* Canvas to Blob */
 
-  flex-direction: column;
+function canvasToBlob(
+  canvas,
+  format,
+  quality
+) {
 
-  gap: 8px;
+  return new Promise(
+    (resolve) => {
+
+      canvas.toBlob(
+        (blob) => {
+
+          resolve(
+            blob
+          );
+
+        },
+        format,
+        quality
+      );
+
+    }
+  );
+
 }
 
 
-.setting-group label {
-  font-weight: 600;
-}
+/* Finish Conversion */
 
+function finishConversion(
+  file,
+  blob,
+  format,
+  resolve,
+  reject
+) {
 
-select,
-input[type="number"] {
-  width: 100%;
+  if (!blob) {
 
-  padding: 12px;
+    reject(
+      new Error(
+        "Conversion failed"
+      )
+    );
 
-  border: 1px solid #cbd5e1;
+    return;
 
-  border-radius: 8px;
-
-  background: white;
-
-  font-size: 15px;
-}
-
-
-input[type="range"] {
-  width: 100%;
-
-  accent-color: #2563eb;
-
-  margin-top: 8px;
-}
-
-
-/* Buttons */
-
-.action-buttons {
-  display: flex;
-
-  gap: 12px;
-
-  margin-top: 30px;
-}
-
-
-.primary-btn,
-.secondary-btn,
-.download-all-btn {
-  padding: 13px 22px;
-
-  border: 0;
-
-  border-radius: 9px;
-
-  cursor: pointer;
-
-  font-weight: 600;
-}
-
-
-.primary-btn {
-  background: #2563eb;
-
-  color: white;
-}
-
-
-.primary-btn:hover:not(:disabled) {
-  background: #1d4ed8;
-}
-
-
-.primary-btn:disabled {
-  opacity: 0.5;
-
-  cursor: not-allowed;
-}
-
-
-.secondary-btn {
-  background: #e2e8f0;
-
-  color: #334155;
-}
-
-
-.secondary-btn:hover {
-  background: #cbd5e1;
-}
-
-
-/* Results */
-
-.results-section {
-  margin-bottom: 50px;
-}
-
-
-.results-section.hidden {
-  display: none;
-}
-
-
-.results-header {
-  display: flex;
-
-  justify-content: space-between;
-
-  align-items: center;
-
-  margin-bottom: 20px;
-}
-
-
-.download-all-btn {
-  background: #16a34a;
-
-  color: white;
-}
-
-
-.download-all-btn:hover {
-  background: #15803d;
-}
-
-
-.result-card {
-  background: white;
-
-  border-radius: 14px;
-
-  padding: 18px;
-
-  margin-bottom: 15px;
-
-  display: grid;
-
-  grid-template-columns:
-    90px 1fr auto;
-
-  align-items: center;
-
-  gap: 18px;
-
-  box-shadow:
-    0 5px 20px
-    rgba(0, 0, 0, 0.05);
-}
-
-
-.result-card img {
-  width: 90px;
-
-  height: 70px;
-
-  object-fit: cover;
-
-  border-radius: 8px;
-
-  background: #f1f5f9;
-}
-
-
-.file-info h3 {
-  font-size: 16px;
-
-  margin-bottom: 5px;
-
-  word-break: break-word;
-}
-
-
-.file-info p {
-  font-size: 14px;
-
-  color: #64748b;
-}
-
-
-.download-btn {
-  background: #2563eb;
-
-  color: white;
-
-  padding: 10px 16px;
-
-  border: 0;
-
-  border-radius: 8px;
-
-  cursor: pointer;
-
-  font-weight: 600;
-}
-
-
-.download-btn:hover {
-  background: #1d4ed8;
-}
-
-
-.success {
-  color: #16a34a !important;
-}
-
-
-.error {
-  color: #dc2626;
-}
-
-
-/* Footer */
-
-footer {
-  text-align: center;
-
-  padding: 30px 15px;
-
-  color: #64748b;
-
-  font-size: 14px;
-}
-
-
-/* Mobile */
-
-@media (max-width: 900px) {
-
-  .settings {
-    grid-template-columns:
-      repeat(2, 1fr);
   }
 
+
+  const extension =
+    getExtension(
+      format
+    );
+
+
+  const originalName =
+    file.name.replace(
+      /\.[^/.]+$/,
+      ""
+    );
+
+
+  const newName =
+    `${originalName}-converted.${extension}`;
+
+
+  resolve({
+
+    blob: blob,
+
+    url:
+      URL.createObjectURL(
+        blob
+      ),
+
+    name:
+      newName,
+
+    originalSize:
+      file.size,
+
+    newSize:
+      blob.size
+
+  });
+
+}
+
+
+/* Extension */
+
+function getExtension(
+  format
+) {
+
+  if (
+    format ===
+    "image/webp"
+  ) {
+
+    return "webp";
+
+  }
+
+
+  if (
+    format ===
+    "image/png"
+  ) {
+
+    return "png";
+
+  }
+
+
+  return "jpg";
+
 }
 
 
-@media (max-width: 600px) {
+/* Display Result */
 
-  .settings {
-    grid-template-columns: 1fr;
-  }
+function displayResult(
+  file
+) {
 
-
-  .action-buttons {
-    flex-direction: column;
-  }
-
-
-  .action-buttons button {
-    width: 100%;
-  }
-
-
-  .results-header {
-    flex-direction: column;
-
-    align-items: stretch;
-
-    gap: 15px;
-  }
+  const savedPercent =
+    file.originalSize > 0
+      ? Math.round(
+          (
+            (
+              file.originalSize -
+              file.newSize
+            ) /
+            file.originalSize
+          ) * 100
+        )
+      : 0;
 
 
-  .result-card {
-    grid-template-columns:
-      70px 1fr;
-  }
+  const card =
+    document.createElement(
+      "div"
+    );
 
 
-  .result-card img {
-    width: 70px;
-
-    height: 60px;
-  }
+  card.className =
+    "result-card";
 
 
-  .download-btn {
-    grid-column: 1 / -1;
+  card.innerHTML = `
 
-    width: 100%;
-  }
+    <img
+      src="${file.url}"
+      alt="Converted image"
+    >
+
+    <div class="file-info">
+
+      <h3>
+        ${escapeHTML(file.name)}
+      </h3>
+
+      <p>
+        Original:
+        ${formatBytes(file.originalSize)}
+        →
+        New:
+        ${formatBytes(file.newSize)}
+      </p>
+
+      <p class="${
+        savedPercent > 0
+          ? "success"
+          : ""
+      }">
+
+        ${
+          savedPercent > 0
+            ? `${savedPercent}% smaller`
+            : "Converted successfully"
+        }
+
+      </p>
+
+    </div>
+
+    <button
+      class="download-btn"
+    >
+      Download
+    </button>
+
+  `;
 
 
-  .tool-card {
-    padding: 20px;
-  }
+  card
+    .querySelector(
+      ".download-btn"
+    )
+    .addEventListener(
+      "click",
+      () => {
+
+        downloadFile(
+          file.url,
+          file.name
+        );
+
+      }
+    );
 
 
-  .preview-grid {
-    grid-template-columns:
-      repeat(2, 1fr);
-  }
+  resultsContainer.appendChild(
+    card
+  );
 
 }
+
+
+/* Download All */
+
+downloadAllBtn.addEventListener(
+  "click",
+  () => {
+
+    if (
+      !convertedFiles.length
+    ) {
+
+      return;
+
+    }
+
+
+    convertedFiles.forEach(
+      (file, index) => {
+
+        setTimeout(
+          () => {
+
+            downloadFile(
+              file.url,
+              file.name
+            );
+
+          },
+          index * 300
+        );
+
+      }
+    );
+
+  }
+);
+
+
+/* Download */
+
+function downloadFile(
+  url,
+  filename
+) {
+
+  const link =
+    document.createElement(
+      "a"
+    );
+
+
+  link.href =
+    url;
+
+
+  link.download =
+    filename;
+
+
+  document.body.appendChild(
+    link
+  );
+
+
+  link.click();
+
+
+  link.remove();
+
+}
+
+
+/* Format Bytes */
+
+function formatBytes(
+  bytes
+) {
+
+  if (bytes === 0) {
+
+    return "0 Bytes";
+
+  }
+
+
+  const units = [
+    "Bytes",
+    "KB",
+    "MB",
+    "GB"
+  ];
+
+
+  const i =
+    Math.floor(
+      Math.log(bytes) /
+      Math.log(1024)
+    );
+
+
+  return (
+    parseFloat(
+      (
+        bytes /
+        Math.pow(
+          1024,
+          i
+        )
+      ).toFixed(2)
+    ) +
+    " " +
+    units[i]
+  );
+
+}
+
+
+/* Error */
+
+function showError(
+  filename
+) {
+
+  const error =
+    document.createElement(
+      "div"
+    );
+
+
+  error.className =
+    "result-card";
+
+
+  error.innerHTML = `
+
+    <div class="error">
+
+      Could not process
+      ${escapeHTML(filename)}
+
+    </div>
+
+  `;
+
+
+  resultsContainer.appendChild(
+    error
+  );
+
+}
+
+
+/* Security */
+
+function escapeHTML(
+  text
+) {
+
+  const div =
+    document.createElement(
+      "div"
+    );
+
+
+  div.textContent =
+    text;
+
+
+  return div.innerHTML;
+
+}
+
+
+/* Clear All */
+
+clearBtn.addEventListener(
+  "click",
+  () => {
+
+    selectedFiles = [];
+
+
+    convertedFiles.forEach(
+      (file) => {
+
+        URL.revokeObjectURL(
+          file.url
+        );
+
+      }
+    );
+
+
+    convertedFiles = [];
+
+
+    fileInput.value =
+      "";
+
+
+    resultsContainer.innerHTML =
+      "";
+
+
+    resultsSection.classList.add(
+      "hidden"
+    );
+
+
+    renderPreviews();
+
+
+    convertBtn.disabled =
+      true;
+
+
+    convertBtn.textContent =
+      "Convert & Compress";
+
+  }
+);
 ```
