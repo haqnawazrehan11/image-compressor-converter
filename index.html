@@ -1,279 +1,750 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta
-    name="description"
-    content="Free online image compressor and converter. Convert JPG, PNG and WebP images and reduce image size to your desired KB."
-  >
+  <meta name="description" content="Free online image editor, compressor, resizer and converter. Edit, resize and convert JPG, PNG and WebP images.">
 
-  <meta
-    name="keywords"
-    content="image compressor, image converter, JPG to WebP, PNG to WebP, WebP to JPG, image resize, compress image to 100kb"
-  >
-
-  <title>Image Compressor & Converter</title>
+  <title>FixEditor - Image Editor & Compressor</title>
 
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <header class="header">
+  <!-- TOP NAVIGATION -->
 
-    <div class="container">
+  <header class="top-nav">
 
-      <h1>Image Compressor & Converter</h1>
+    <div class="brand">
+      <div class="brand-icon">F</div>
+      <span>FixEditor</span>
+    </div>
 
-      <p>
-        Compress and convert JPG, PNG and WebP images online.
-      </p>
+    <nav>
+      <a href="#">Home</a>
+
+      <a href="#tools">
+        ▦ Tools
+        <span>⌄</span>
+      </a>
+
+      <a href="#how">How it works</a>
+      <a href="#templates">Templates</a>
+      <a href="#guides">Guides</a>
+    </nav>
+
+    <div class="nav-actions">
+
+      <button class="language">
+        US&nbsp; English ⌄
+      </button>
+
+      <button
+        id="themeBtn"
+        class="icon-button"
+        title="Toggle dark mode"
+      >
+        ☾
+      </button>
 
     </div>
 
   </header>
 
 
-  <main class="container">
+  <!-- APP -->
 
-    <section class="tool-card">
+  <main class="app-wrapper">
 
+    <section class="editor-app">
 
-      <!-- Upload Area -->
+      <!-- EDITOR HEADER -->
 
-      <div
-        class="upload-area"
-        id="dropArea"
-      >
+      <div class="editor-header">
 
-        <div class="upload-icon">
-          📷
+        <div class="editor-title">
+
+          <div class="mini-logo">
+            F
+          </div>
+
+          <strong>FIXEDITOR</strong>
+
+          <label
+            class="open-btn"
+            for="fileInput"
+          >
+            📁 Open
+          </label>
+
+          <input
+            id="fileInput"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            hidden
+          >
+
         </div>
 
-        <h2>
-          Upload Your Images
-        </h2>
 
-        <p>
-          Drag & drop your images here or choose files from your device.
-        </p>
-
-        <label
-          class="upload-btn"
-          for="fileInput"
-        >
-          Choose Images
-        </label>
-
-        <input
-          type="file"
-          id="fileInput"
-          accept="image/jpeg,image/png,image/webp"
-          multiple
-          hidden
-        >
-
-        <small>
-          JPG, JPEG, PNG and WebP supported
-        </small>
-
-      </div>
-
-
-      <!-- Image Preview -->
-
-      <div
-        id="previewSection"
-        class="preview-section hidden"
-      >
-
-        <div class="preview-header">
-
-          <h2>
-            Selected Images
-          </h2>
+        <div class="history-buttons">
 
           <button
-            id="removeAllBtn"
-            class="remove-all-btn"
+            id="undoBtn"
+            title="Undo"
           >
-            Remove All
+            ↶
+          </button>
+
+          <button
+            id="redoBtn"
+            title="Redo"
+          >
+            ↷
+          </button>
+
+          <button
+            id="resetBtn"
+            title="Reset"
+          >
+            ⟳
+          </button>
+
+          <button
+            id="fullscreenBtn"
+            title="Fullscreen"
+          >
+            ⛶
           </button>
 
         </div>
 
-        <div
-          id="previewGrid"
-          class="preview-grid"
-        ></div>
+
+        <div class="header-actions">
+
+          <button
+            id="darkEditorBtn"
+            class="small-icon"
+          >
+            ☾
+          </button>
+
+          <button
+            id="downloadTopBtn"
+            class="download-top"
+          >
+            ✓ Download
+          </button>
+
+          <button
+            id="exportTopBtn"
+            class="export-top"
+          >
+            ⇩ Export ▾
+          </button>
+
+        </div>
 
       </div>
 
 
-      <!-- Settings -->
+      <!-- MAIN EDITOR -->
 
-      <div class="settings">
-
-
-        <!-- Format -->
-
-        <div class="setting-group">
-
-          <label for="format">
-            Convert To
-          </label>
-
-          <select id="format">
-
-            <option value="image/webp">
-              WebP
-            </option>
-
-            <option value="image/jpeg">
-              JPG
-            </option>
-
-            <option value="image/png">
-              PNG
-            </option>
-
-          </select>
-
-        </div>
+      <div class="editor-body">
 
 
-        <!-- Quality -->
+        <!-- LEFT TOOLS -->
 
-        <div class="setting-group">
+        <aside class="left-tools">
 
-          <label for="quality">
+          <button
+            class="tool active"
+            data-tool="resize"
+          >
+            <span>⛶</span>
+            <small>Resize</small>
+          </button>
 
-            Quality:
-            <span id="qualityValue">
-              80
-            </span>%
 
-          </label>
+          <button
+            class="tool"
+            data-tool="crop"
+          >
+            <span>⌗</span>
+            <small>Crop</small>
+          </button>
 
-          <input
-            type="range"
-            id="quality"
-            min="10"
-            max="100"
-            value="80"
+
+          <button
+            class="tool"
+            data-tool="background"
+          >
+            <span>◇</span>
+            <small>BG</small>
+          </button>
+
+
+          <button
+            class="tool"
+            data-tool="filters"
+          >
+            <span>☷</span>
+            <small>Filters</small>
+          </button>
+
+
+          <button
+            class="tool"
+            data-tool="cutout"
+          >
+            <span>⌑</span>
+            <small>CutOut</small>
+          </button>
+
+
+          <button
+            class="tool"
+            data-tool="transform"
+          >
+            <span>⤢</span>
+            <small>Transform</small>
+          </button>
+
+
+          <button
+            class="tool"
+            data-tool="watermark"
+          >
+            <span>♟</span>
+            <small>Watermark</small>
+          </button>
+
+
+          <button
+            class="tool"
+            data-tool="slug"
+          >
+            <span>▤</span>
+            <small>Slug</small>
+          </button>
+
+
+          <button
+            class="tool"
+            data-tool="draw"
+          >
+            <span>╱</span>
+            <small>Draw</small>
+          </button>
+
+        </aside>
+
+
+        <!-- CANVAS AREA -->
+
+        <section class="canvas-area">
+
+          <div
+            id="emptyState"
+            class="empty-state"
           >
 
-        </div>
+            <div class="upload-big">
+              ↑
+            </div>
+
+            <h2>
+              Drop your image here
+            </h2>
+
+            <p>
+              or choose an image from your device
+            </p>
+
+            <label
+              for="fileInput"
+              class="choose-image"
+            >
+              Choose Image
+            </label>
+
+            <p class="formats">
+              JPG · PNG · WebP
+            </p>
+
+          </div>
 
 
-        <!-- Maximum Width -->
-
-        <div class="setting-group">
-
-          <label for="maxWidth">
-            Maximum Width
-          </label>
-
-          <input
-            type="number"
-            id="maxWidth"
-            min="100"
-            placeholder="Original size"
+          <div
+            id="canvasWrapper"
+            class="canvas-wrapper hidden"
           >
 
-        </div>
+            <div class="checkerboard">
+
+              <canvas
+                id="editorCanvas"
+              ></canvas>
+
+            </div>
+
+          </div>
 
 
-        <!-- Target Size -->
+          <!-- BOTTOM BAR -->
 
-        <div class="setting-group">
-
-          <label for="targetSize">
-            Target Size (KB)
-          </label>
-
-          <input
-            type="number"
-            id="targetSize"
-            min="1"
-            placeholder="Example: 100"
+          <div
+            id="bottomBar"
+            class="bottom-bar hidden"
           >
 
-        </div>
+            <button id="backgroundBtn">
+              ◐ Change Background ⌄
+            </button>
+
+            <div class="zoom-controls">
+
+              <button id="zoomOut">
+                −
+              </button>
+
+              <span id="zoomValue">
+                100%
+              </span>
+
+              <button id="zoomIn">
+                +
+              </button>
+
+              <button id="fitBtn">
+                ⛶
+              </button>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- RIGHT PANEL -->
+
+        <aside class="right-panel">
+
+          <div
+            id="resizePanel"
+            class="panel-content"
+          >
+
+            <div class="panel-title">
+
+              <span>⛶ Resize Image</span>
+
+              <button
+                id="panelReset"
+                title="Reset"
+              >
+                ↶
+              </button>
+
+            </div>
+
+
+            <div class="unit-label">
+              DIMENSION UNITS
+            </div>
+
+
+            <div class="units">
+
+              <button class="unit active">
+                PX
+              </button>
+
+              <button class="unit">
+                %
+              </button>
+
+              <button class="unit">
+                IN
+              </button>
+
+              <button class="unit">
+                CM
+              </button>
+
+              <button class="unit">
+                MM
+              </button>
+
+            </div>
+
+
+            <div class="dimension-row">
+
+              <div>
+
+                <label>
+                  WIDTH (PX)
+                </label>
+
+                <input
+                  id="widthInput"
+                  type="number"
+                >
+
+              </div>
+
+
+              <div>
+
+                <label>
+                  HEIGHT (PX)
+                </label>
+
+                <input
+                  id="heightInput"
+                  type="number"
+                >
+
+              </div>
+
+            </div>
+
+
+            <label class="lock-row">
+
+              <input
+                id="lockRatio"
+                type="checkbox"
+                checked
+              >
+
+              Lock aspect ratio
+
+            </label>
+
+            <button
+              id="applyResize"
+              class="apply-button"
+            >
+              Apply Resize
+            </button>
+
+          </div>
+
+
+          <!-- OTHER PANEL -->
+
+          <div
+            id="otherPanel"
+            class="panel-content hidden"
+          >
+
+            <div class="panel-title">
+
+              <span id="otherTitle">
+                Tool
+              </span>
+
+            </div>
+
+            <div id="otherContent"></div>
+
+          </div>
+
+
+          <!-- LAYERS -->
+
+          <div class="layers-box">
+
+            <div class="layers-title">
+
+              <span>
+                Layers
+              </span>
+
+              <b id="layerCount">
+                1
+              </b>
+
+            </div>
+
+            <div
+              id="layerList"
+              class="layer-list"
+            >
+
+              <div class="layer-item active">
+                <span>🖼️</span>
+                <span id="layerName">
+                  Image
+                </span>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- HISTORY -->
+
+          <div class="history-box">
+
+            <button id="historyBtn">
+              ◷ History
+              <b>3/3</b>
+            </button>
+
+          </div>
+
+        </aside>
 
       </div>
-
-
-      <!-- Buttons -->
-
-      <div class="action-buttons">
-
-        <button
-          id="convertBtn"
-          class="primary-btn"
-          disabled
-        >
-          Convert & Compress
-        </button>
-
-        <button
-          id="clearBtn"
-          class="secondary-btn"
-        >
-          Clear All
-        </button>
-
-      </div>
-
-    </section>
-
-
-    <!-- Results -->
-
-    <section
-      id="resultsSection"
-      class="results-section hidden"
-    >
-
-      <div class="results-header">
-
-        <h2>
-          Converted Images
-        </h2>
-
-        <button
-          id="downloadAllBtn"
-          class="download-all-btn"
-        >
-          Download All
-        </button>
-
-      </div>
-
-      <div id="results"></div>
 
     </section>
 
   </main>
 
 
-  <footer>
+  <!-- EXPORT MODAL -->
 
-    <p>
-      © 2026 Image Compressor & Converter.
-      All rights reserved.
-    </p>
+  <div
+    id="exportModal"
+    class="modal hidden"
+  >
 
-  </footer>
+    <div class="modal-card">
+
+      <div class="modal-header">
+
+        <div>
+          <span class="export-icon">⇩</span>
+          <strong>Export & Download</strong>
+
+          <span
+            id="exportDimensions"
+            class="dimension-badge"
+          >
+            0×0px
+          </span>
+        </div>
+
+        <button
+          id="closeModal"
+          class="close-modal"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="export-preview">
+
+        <div class="preview-checker">
+
+          <canvas
+            id="exportCanvas"
+          ></canvas>
+
+        </div>
+
+      </div>
+
+
+      <div class="export-options">
+
+
+        <!-- FORMAT -->
+
+        <div class="export-row">
+
+          <div class="export-label">
+            📄 FORMAT
+          </div>
+
+          <select id="exportFormat">
+
+            <option value="original">
+              Original
+            </option>
+
+            <option value="image/jpeg">
+              JPEG
+            </option>
+
+            <option value="image/png">
+              PNG
+            </option>
+
+            <option value="image/webp">
+              WebP
+            </option>
+
+          </select>
+
+          <span id="fromFormat">
+            JPEG
+          </span>
+
+          <span>→</span>
+
+          <span
+            id="toFormat"
+            class="format-final"
+          >
+            JPEG
+          </span>
+
+        </div>
+
+
+        <!-- MAX SIZE -->
+
+        <div class="export-row">
+
+          <div class="export-label">
+            ↘ MAX SIZE
+          </div>
+
+          <input
+            id="maxSizeInput"
+            type="number"
+            min="1"
+            placeholder="e.g. 100"
+          >
+
+          <select id="sizeUnit">
+
+            <option value="KB">
+              KB
+            </option>
+
+            <option value="MB">
+              MB
+            </option>
+
+          </select>
+
+          <div class="current-size">
+
+            <small>
+              CURRENT SIZE
+            </small>
+
+            <strong id="currentSize">
+              0 KB
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- COMPRESS -->
+
+        <div class="export-row">
+
+          <div class="export-label">
+            ☷ COMPRESS
+          </div>
+
+          <span
+            id="compressValue"
+            class="compress-value"
+          >
+            90%
+          </span>
+
+          <input
+            id="compressSlider"
+            type="range"
+            min="10"
+            max="100"
+            value="90"
+          >
+
+          <button
+            id="resetCompress"
+            class="reset-compress"
+          >
+            ↶
+          </button>
+
+          <div class="exif-option">
+
+            <span>
+              ⓘ EXIF
+            </span>
+
+            <label class="switch">
+
+              <input
+                id="exifToggle"
+                type="checkbox"
+                checked
+              >
+
+              <span></span>
+
+            </label>
+
+          </div>
+
+        </div>
+
+
+        <!-- RENAME -->
+
+        <div class="export-row">
+
+          <div class="export-label">
+            T RENAME
+          </div>
+
+          <input
+            id="fileNameInput"
+            class="rename-input"
+            type="text"
+          >
+
+          <span class="extension">
+            .jpg
+          </span>
+
+        </div>
+
+
+      </div>
+
+
+      <button
+        id="exportNow"
+        class="export-now"
+      >
+        ⇩ EXPORT NOW
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- IMAGE INPUT FOR BACKGROUND ETC -->
+
+  <input
+    type="color"
+    id="colorPicker"
+    value="#ffffff"
+    hidden
+  >
 
 
   <script src="script.js"></script>
 
 </body>
-
 </html>
-```
